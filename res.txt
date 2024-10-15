@@ -1,0 +1,309 @@
+<style>
+    .cl-catalog-title-sub{
+        padding-left: 50px !important;
+    }
+    .cl-sub-db{
+        padding-left:70px !important;
+    }
+</style>
+<ol>
+            <li class="cl-catalog-item
+            " data-id="7c18e735fe24532e90527668bfd242af">
+                    <span class="cl-catalog-title" title="新客户拓展的技巧">
+                    <span data-id="7c18e735fe24532e90527668bfd242af" class="cl-catalog-icon"></span>新客户拓展的技巧</span>
+                    <div class="cl-catalog-item-sub">
+                            <a href="javascript:;"   data-id="7f5bab124afde54d5022e3eb55b925f3" title="锁定目标客户" class="scormItem-no cl-catalog-link cl-catalog-link-sub
+item-done cl-catalog-link-done"><span
+                                        class="cl-catalog-icon" ></span>(1)&nbsp;锁定目标客户
+                            </a>
+
+                    </div>
+                    <div class="cl-catalog-item-sub">
+                            <a href="javascript:;"   data-id="2941a607bc77f14590c432fdfc4d4e0f" title="搜存目标客户" class="scormItem-no cl-catalog-link cl-catalog-link-sub
+item-no"><span
+                                        class="cl-catalog-icon" ></span>(2)&nbsp;搜存目标客户
+                            </a>
+
+                    </div>
+                    <div class="cl-catalog-item-sub">
+                            <a href="javascript:;"   data-id="b360c29d92b75f5e39cbfb85accb85fd" title="确定目标客户" class="scormItem-no cl-catalog-link cl-catalog-link-sub
+item-no"><span
+                                        class="cl-catalog-icon" ></span>(3)&nbsp;确定目标客户
+                            </a>
+
+                    </div>
+                    <div class="cl-catalog-item-sub">
+                            <a href="javascript:;"   data-id="aa1a8a965238fba8161c6bc849adaebd" title="制定营销策划方案" class="scormItem-no cl-catalog-link cl-catalog-link-sub
+item-no"><span
+                                        class="cl-catalog-icon" ></span>(4)&nbsp;制定营销策划方案
+                            </a>
+
+                    </div>
+            </li>
+</ol>
+
+<input type="hidden" name="fullScreen" id="fullScreen" value="false"/>
+<script>
+    $(function(){
+        var isScorm = ("true" === "false");
+
+        if(!info.scoId){
+            var currObj;
+            if(isScorm){
+                currObj = $("#courseItemId").find('.scormItem-no')[0];
+                if(!currObj){
+                    currObj = $("#courseItemId").find('.item-no')[0];
+                }
+
+                if(!currObj){
+                    currObj = $("#courseItemId").find('.item-no')[0];
+                }
+            }else{
+                currObj = $("#courseItemId").find('.item-no')[0];
+                if(!currObj){
+                    currObj = $("#courseItemId").find('.item-done')[0];
+                }
+            }
+
+            info.scoId = $(currObj).attr('data-id');
+            $(currObj).addClass("cl-catalog-playing").siblings().removeClass("cl-catalog-playing");
+        }
+
+        function parseUrl(url) {
+            url = url == null ? window.location.href : url;
+            var search = url.substring(url.lastIndexOf("?") + 1);
+            var obj = {};
+            var reg = /([^?&=]+)=([^?&=]*)/g;
+            search.replace(reg, function (rs, $1, $2) {
+                var name = decodeURIComponent($1);
+                var val = decodeURIComponent($2);
+                val = String(val);
+                obj[name] = val;
+                return rs;
+            });
+            return obj;
+        }
+        var signParam = parseUrl().elsSign;
+        var sessionIdParam = parseUrl().eln_session_id;
+        var crosUrl = "/els/html/course/courseStudy.getALiPlayCorpCodes.do";
+        if (signParam) {
+            crosUrl = "/els/html/course/courseStudy.getALiPlayCorpCodes.do?elsSign="+signParam;
+        }else if (sessionIdParam) {
+            crosUrl = "/els/html/course/courseStudy.getALiPlayCorpCodes.do?elsSign" + sessionIdParam;
+        }
+        var iscorp = false;
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: crosUrl,
+            success: function (data) {
+                console.log('corpCodeData--->', data);
+                iscorp = true;
+                if (data == "*") {
+                    iscorp = true;
+                    console.log("全部开放");
+                } else if (data) {
+                    var corpCodes = data.split(',');
+                    var oncorp = "sdnsyh" || "";
+                    iscorp = corpCodes.indexOf(oncorp) > -1 ? false : true;
+                    if (iscorp) {
+                        console.log("播放器开放此公司！");
+                    } else {
+                        console.log("播放器不开放此公司！");
+                    }
+                }
+            }
+        });
+        // console.log('iscorp item', iscorp);
+        if (tbcUtils.checkVideo() && iscorp && !isScorm) {
+            console.log('!IE');
+            require(['https://21tb-static.21tb.com/web-static/assets/courseV2/js/lib/newStudyCourse_video.js?v=2.7.48', '/els/js/scormProcessor.js', '/els/js/scormCoursePlay.js'], function (courseStudy) {
+                courseStudy.learnMultiScreenCoruse(info, hasCollection);
+            });
+        } else {
+            console.log('thisIE');
+            require(['https://21tb-static.21tb.com/web-static/assets/courseV2/js/lib/newStudyCourse.js?v=2.7.48', '/els/js/scormProcessor.js', '/els/js/scormCoursePlay.js'], function (courseStudy) {
+                courseStudy.learnMultiScreenCoruse(info, hasCollection);
+            });
+        }
+
+        if(info.viewMode != 'browsed'){
+            playModule.barrageInit(info);
+        }
+        $(".cl-catalog-link ").click(function(){
+            //点击目录，激活状态
+            $(this).closest("#courseItemId").find(".cl-catalog-link").removeClass("cl-catalog-playing");
+            $(this).addClass("cl-catalog-playing");
+            info.scoId = $(this).attr('data-id');
+            if(info.viewMode != 'browsed'){
+                playModule.barrageInit(info);
+                // scorm 课程判断完成状态弹窗提示
+                if($("#goNextStep").hasClass("hide")){
+                    try {
+                        //如果是scorm课程
+                        if (info.courseStandard.toUpperCase().indexOf("SCORM") != -1) {
+                            $.post(CONFIG.ctx + "html/courseStudyItem/courseStudyItem.scoIsComplate.do?courseType=NEW_COURSE_CENTER&courseId=" + info.courseId + "&processType=" + info.courseStandard.toUpperCase(), function (d) {
+                                var courseStudyRecord = d.courseStudyRecord;
+                                if (courseStudyRecord != undefined && courseStudyRecord.currentStepRate != undefined &&(courseStudyRecord.currentStepRate === '100'|| courseStudyRecord.currentStepRate === "100.0") && courseStudyRecord.currentStep==="COURSE_COURSE_STUDY"){
+                                    window.onbeforeunload = null;
+                                    if ($("#courseInfoSteps").find(".cs-item-exam,.cs-item-evaluate").length > 0){
+                                        $("#goNextStep").removeClass("hide");
+                                        try {
+                                            var $nextStep = $("#courseInfoSteps").find(".cs-item-study").next("li").find("a");
+                                            var dataType = $nextStep.attr("data-type");
+                                            if (dataType != null && dataType != undefined && (dataType == 'COURSE_EVALUATE' || dataType == 'COURSE_EXAM')) {
+                                                $nextStep.attr("onclick", "loadStudyStep('" + dataType + "')");
+                                                $nextStep.css("cursor", "pointer");
+                                            }
+                                        } catch (e) {
+                                            console.log(e);
+                                        }
+                                    }
+                                    if(courseStudyRecord.getScore == null){
+                                        // 弹窗显示已经完成 进入下一步
+                                        ncp.successTip("",{
+                                            title: "",
+                                            time:4000,
+                                            skin:" ncp-time-tip",
+                                            closeBtn:false,
+                                            btn:false,
+                                            content:"<div style='font-size: 14px;margin: 5px 10px;'><span class='cl-catalog-icon' style='display: inline-block;margin-top: 0px;height: 20px;'></span>学习进度已完成，点击进入下一步按钮</div>"
+                                        })
+                                    }else if(courseStudyRecord != null && !courseStudyRecord.schemeId){
+                                        togglePlayState(false);
+                                        if(!courseStudyRecord.schemeId){
+                                            $.post(CONFIG.ctx+"html/studyCourse/studyCourse.updateGetScoreTip.do",{courseId:info.courseId},function(data){});
+
+                                            var subTitleString = "您获得";
+                                            if(d.hideCourseScore==null || !d.hideCourseScore){
+                                                // 不需要隐藏学分
+                                                subTitleString = subTitleString + "<span class='cs-caution' style='color: #49A9EE'>"+ courseStudyRecord.getScore +"</span>学分";
+                                            }
+                                            if(d.coursePeriod != null && d.coursePeriod != '' && d.coursePeriod != '0' && d.coursePeriod != 'null' && d.coursePeriod != '0.0') {
+                                                subTitleString = subTitleString + "，<span class='cs-caution' style='color: #49A9EE'>" + d.coursePeriod + "</span>学时";
+                                            }
+
+                                            if(d.transAmount != null && d.transAmount != '' && d.transAmount != '0' && d.transAmount != 'null' && d.transAmount != '0.0') {
+                                                subTitleString = subTitleString + "，<span class='cs-caution' style='color: #49A9EE'>"+d.transAmount+"</span>"+d.dimLabel;
+                                            }
+                                            if(d.coinAmount != null && d.coinAmount != '' && d.coinAmount != '0' && d.coinAmount != 'null' && d.coinAmount != '0.0') {
+                                                subTitleString = subTitleString +"，<span class='cs-caution' style='color: #49A9EE'>"+d.coinAmount+"</span>个光华币";
+                                            }
+
+                                            elpui.use('modal', function () {
+                                                var modal = elpui.modal;
+                                                modal.success({
+                                                    title: '恭喜您已经完成课程' + '"' + ($("#courseTitle").text().trim()) + '"!',
+                                                    content: subTitleString,
+                                                    cls: 'self-dialog-class-name',
+                                                    end:function(){
+                                                        togglePlayState(true,initialPlayState);
+                                                        var hostDomain =getUrlParam("host");
+                                                        var _url;
+                                                        if (hostDomain !== undefined && hostDomain !== "" &&  hostDomain !== null) {
+                                                            if (hostDomain.indexOf("http") !== -1) {
+                                                                _url = hostDomain
+                                                            }else{
+                                                                _url = "http://"+hostDomain
+                                                            }
+                                                        }
+                                                        if (_url != undefined && _url!= null && _url.length > 0){
+                                                            //下一句必须要 进入下一步的点击时间
+                                                            location.href = _url+CONFIG.ctx+"html/studyCourse/studyCourse.enterCourse.do?courseId="+info.courseId+"&willGoStep=&courseType=NEW_COURSE_CENTER";
+                                                        }else{
+                                                            //下一句必须要 进入下一步的点击时间
+                                                            location.href = CONFIG.ctx+"html/studyCourse/studyCourse.enterCourse.do?courseId="+info.courseId+"&willGoStep=&courseType=NEW_COURSE_CENTER";
+                                                        }
+                                                    }
+                                                });
+                                            });
+                                        }
+                                    }
+                                }
+                                var results = d.results;
+                                $.each(results, function (i, result) {
+                                    $("[data-id='" + result + "']").removeClass("item-no").addClass("item-done").addClass("cl-catalog-link-done");
+                                });
+                            });
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+            }
+            //兼容IE or aliplayer2
+            if (tbcUtils.checkVideo() && iscorp && !isScorm) {
+                console.log('!IE');
+                require(['https://21tb-static.21tb.com/web-static/assets/courseV2/js/lib/newStudyCourse_video.js?v=2.7.48','/els/js/scormProcessor.js?v=2.7.48', '/els/js/scormCoursePlay.js?v=2.7.48'], function (courseStudy) {
+                    courseStudy.coursePlayEvent(info);
+                });
+            }else{
+                console.log('thisIE');
+                require(['https://21tb-static.21tb.com/web-static/assets/courseV2/js/lib/newStudyCourse.js?v=2.7.48','/els/js/scormProcessor.js?v=2.7.48', '/els/js/scormCoursePlay.js?v=2.7.48'], function (courseStudy) {
+                    courseStudy.coursePlayEvent(info);
+                });
+            }
+
+
+        });
+        var initialPlayState;
+        function _getFlashMovieObject(movieName) {
+            if (window.document[movieName]) {
+                return window.document[movieName];
+            }
+            if (navigator.appName.indexOf("Microsoft Internet") == -1) {
+                if (document.embeds && document.embeds[movieName]) {
+                    return document.embeds[movieName];
+                }
+            } else {
+                return document.getElementById(movieName);
+            }
+        }
+
+        function togglePlayState(state,initialState){
+            //ie 和wmv
+            var $palyerContainer=$("#palyerContainerId");
+            if(!!_getFlashMovieObject("mPlayer")){
+                var _media = _getFlashMovieObject("mPlayer");
+                if (!_media){
+                    return;
+                }
+                //playState：1停止，2暂停，3播放中
+                if(state){
+                    if(initialState ===3 && !!_media.controls){
+                        _media.controls.play();
+                    }
+                    $palyerContainer.removeClass("hideViaPosition");
+                    if(!!_media.playState){
+                        return _media.playState;
+                    }
+                }else{
+                    //隐藏前设置播放状态
+                    setWmvInitalState();
+                    $palyerContainer.addClass("hideViaPosition");
+                    !!_media.controls && _media.controls.pause();
+                }
+
+            }
+            //scorm url 类课程
+            if(!!window.isScorm || !!window.isUrlCourse){
+                if(state){
+                    $("#palyerContainerId,#urlCourseIframeId").removeClass("hideViaPosition");
+                }else{
+                    $("#palyerContainerId,#urlCourseIframeId").addClass("hideViaPosition");
+                }
+            }
+        }
+        function setWmvInitalState(){
+            var _mp=_getFlashMovieObject("mPlayer");
+            if(!!document.documentMode && _mp){
+                initialPlayState=_mp.playState;
+            }
+        }
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+            var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+            if (r != null) return unescape(r[2]); return null; //返回参数值
+        }
+    })
+</script>
